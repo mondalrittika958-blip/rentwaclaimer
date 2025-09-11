@@ -14,7 +14,7 @@ class TelegramBot:
         self.running = False
         
     def send_message(self, text, parse_mode="HTML"):
-        """Send message to Telegram"""
+        """Send message to Telegram with rate limiting"""
         if self.bot_token == "YOUR_BOT_TOKEN_HERE" or self.chat_id == "YOUR_CHAT_ID_HERE":
             print(f"📤 Telegram not configured. Would send: {text}")
             return False
@@ -27,10 +27,15 @@ class TelegramBot:
                 "parse_mode": parse_mode
             }
             
-            response = requests.post(url, json=data)
+            response = requests.post(url, json=data, timeout=10)
             if response.status_code == 200:
                 print(f"✅ Telegram message sent successfully")
                 return True
+            elif response.status_code == 429:
+                # Rate limited - wait and retry
+                print(f"⚠️ Telegram rate limited, waiting...")
+                time.sleep(2)
+                return False
             else:
                 print(f"❌ Telegram failed: {response.status_code}")
                 print(f"Response: {response.text}")
@@ -41,15 +46,15 @@ class TelegramBot:
             return False
     
     def get_updates(self):
-        """Get updates from Telegram"""
+        """Get updates from Telegram with rate limiting"""
         try:
             url = f"{self.base_url}/getUpdates"
             params = {
                 "offset": self.last_update_id + 1,
-                "timeout": 30
+                "timeout": 10
             }
             
-            response = requests.get(url, params=params)
+            response = requests.get(url, params=params, timeout=15)
             if response.status_code == 200:
                 data = response.json()
                 if data["ok"]:
@@ -57,6 +62,11 @@ class TelegramBot:
                 else:
                     print(f"❌ Telegram API error: {data['description']}")
                     return []
+            elif response.status_code == 429:
+                # Rate limited - wait and return empty
+                print(f"⚠️ Telegram rate limited on getUpdates, waiting...")
+                time.sleep(2)
+                return []
             else:
                 print(f"❌ HTTP error: {response.status_code}")
                 return []
@@ -199,7 +209,7 @@ This bot monitors 4 websites automatically and sends notifications for:
                         # Handle callback queries if needed
                         pass
                 
-                time.sleep(1)  # Small delay between polls
+                time.sleep(5)  # Longer delay between polls to avoid rate limiting
                 
             except KeyboardInterrupt:
                 print("\n🛑 Stopping Telegram Bot...")

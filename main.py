@@ -22,10 +22,64 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+def run_automation():
+    """Run the automation bot in a separate process"""
+    try:
+        # Wait a bit for everything to be ready
+        time.sleep(10)
+        
+        import subprocess
+        import sys
+        
+        logger.info("🚀 Starting simple automation process...")
+        
+        # Start the simple automation process
+        process = subprocess.Popen([
+            sys.executable, "simple_automation.py"
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        
+        logger.info("✅ Simple automation process started")
+        
+        # Monitor the process
+        while True:
+            # Check if process is still running
+            if process.poll() is not None:
+                logger.error("❌ Automation process stopped, restarting...")
+                # Read any output before restarting
+                try:
+                    stdout, stderr = process.communicate(timeout=5)
+                    if stdout:
+                        logger.info(f"Automation stdout: {stdout}")
+                    if stderr:
+                        logger.error(f"Automation stderr: {stderr}")
+                except subprocess.TimeoutExpired:
+                    logger.warning("⚠️ Timeout reading process output")
+                    process.kill()
+                
+                # Wait a bit before restarting
+                time.sleep(5)
+                
+                # Restart the process
+                process = subprocess.Popen([
+                    sys.executable, "simple_automation.py"
+                ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                logger.info("🔄 Automation process restarted")
+            
+            time.sleep(30)  # Check every 30 seconds
+
+    except Exception as e:
+        logger.error(f"❌ Automation error: {e}")
+        import traceback
+        traceback.print_exc()
+
+        # Restart after error (for 24/7 operation)
+        logger.info("🔄 Restarting automation in 30 seconds...")
+        time.sleep(30)
+        run_automation()
+
 def run_bot():
     """Run the automation bot"""
     try:
-        from advanced_automation_playwright import AdvancedAutomation, WEBSITES
         from telegram_bot import TelegramBot
         from webhook_config import get_telegram_bot
 
@@ -35,9 +89,14 @@ def run_bot():
         telegram_bot_thread.start()
         logger.info("🤖 Telegram Bot polling started in background.")
 
-        # Start Advanced Automation
-        automation = AdvancedAutomation()
-        automation.start_monitoring()
+        # Start automation in a separate thread to avoid asyncio conflict
+        automation_thread = threading.Thread(target=run_automation, daemon=True)
+        automation_thread.start()
+        logger.info("🤖 Automation started in background thread.")
+
+        # Keep main thread alive
+        while True:
+            time.sleep(1)
 
     except Exception as e:
         logger.error(f"❌ Bot error: {e}")

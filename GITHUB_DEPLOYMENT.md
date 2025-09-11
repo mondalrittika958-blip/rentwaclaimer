@@ -36,11 +36,11 @@ git push -u origin main
 
 ### 2.2 Configure Render Service
 - **Name**: `website-monitor-bot`
-- **Environment**: `Python 3`
+- **Environment**: `Python 3.11.9`
 - **Region**: Choose closest to you
 - **Branch**: `main`
 - **Root Directory**: Leave empty
-- **Build Command**: `pip install -r requirements.txt && python setup_chromedriver.py`
+- **Build Command**: `pip install --upgrade pip && pip install -r requirements.txt && playwright install --with-deps chromium`
 - **Start Command**: `python main.py`
 
 ### 2.3 Environment Variables

@@ -1,4 +1,5 @@
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
+import asyncio
 import time
 import threading
 import requests
@@ -66,14 +67,14 @@ class AdvancedAutomation:
         self.pages = {}
         self.last_reset_times = {}
         self.running = True
-        self.setup_browser()
+        # Setup will be called in start_monitoring
         
-    def setup_browser(self):
+    async def setup_browser(self):
         """Setup Playwright browser with multiple pages"""
-        self.playwright = sync_playwright().start()
+        self.playwright = await async_playwright().start()
         
         # Launch browser with options
-        self.browser = self.playwright.chromium.launch(
+        self.browser = await self.playwright.chromium.launch(
             headless=True,
             args=[
                 '--no-sandbox',
@@ -88,14 +89,14 @@ class AdvancedAutomation:
         )
         
         # Create context
-        self.context = self.browser.new_context(
+        self.context = await self.browser.new_context(
             viewport={'width': 1920, 'height': 1080},
             user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         )
         
         # Create pages for each website
         for site in WEBSITES:
-            page = self.context.new_page()
+            page = await self.context.new_page()
             self.pages[site["name"]] = page
             print(f"📄 Created page for {site['name']}")
         
@@ -108,7 +109,7 @@ class AdvancedAutomation:
             return True
         return False
     
-    def login_to_site(self, site_config):
+    async def login_to_site(self, site_config):
         """Login to a specific site"""
         site_name = site_config["name"]
         print(f"🔐 Logging into {site_name}...")
@@ -123,14 +124,14 @@ class AdvancedAutomation:
                     return False
                 
                 # Navigate to login page
-                self.current_page.goto(site_config["url"])
-                self.current_page.wait_for_load_state("networkidle")
-                time.sleep(3)
+                await self.current_page.goto(site_config["url"])
+                await self.current_page.wait_for_load_state("networkidle")
+                await asyncio.sleep(3)
                 
                 # Fill phone number
                 try:
                     phone_field = self.current_page.locator(site_config["phone_field"]).first
-                    phone_field.fill("8974395024")
+                    await phone_field.fill("8974395024")
                     print(f"📱 Phone entered for {site_name}")
                 except Exception as e:
                     print(f"❌ Error filling phone for {site_name}: {e}")
@@ -139,7 +140,7 @@ class AdvancedAutomation:
                 # Fill password
                 try:
                     password_field = self.current_page.locator(site_config["password_field"]).first
-                    password_field.fill("53561106@Tojo")
+                    await password_field.fill("53561106@Tojo")
                     print(f"🔑 Password entered for {site_name}")
                 except Exception as e:
                     print(f"❌ Error filling password for {site_name}: {e}")
@@ -148,22 +149,22 @@ class AdvancedAutomation:
                 # Click login button
                 try:
                     login_button = self.current_page.locator(site_config["login_button"]).first
-                    login_button.click()
+                    await login_button.click()
                     print(f"✅ Login button clicked for {site_name}")
                 except Exception as e:
                     print(f"❌ Error clicking login button for {site_name}: {e}")
                     continue
                 
                 # Wait for page load
-                time.sleep(5)
+                await asyncio.sleep(5)
                 
                 # Handle popup if present
-                self.handle_popup_if_present(site_config)
+                await self.handle_popup_if_present(site_config)
                 
                 # Navigate to main page
-                self.current_page.goto(site_config["main_url"])
-                self.current_page.wait_for_load_state("networkidle")
-                time.sleep(3)
+                await self.current_page.goto(site_config["main_url"])
+                await self.current_page.wait_for_load_state("networkidle")
+                await asyncio.sleep(3)
                 
                 # Verify login
                 current_url = self.current_page.url
@@ -173,7 +174,7 @@ class AdvancedAutomation:
                     print(f"✅ Successfully logged into {site_name}")
                     
                     # Get initial amount
-                    amount = self.get_amount(site_config)
+                    amount = await self.get_amount(site_config)
                     if amount:
                         print(f"💰 {site_name} amount: {amount}")
                         self.send_amount_update(site_name, amount, "login_success")
@@ -186,7 +187,7 @@ class AdvancedAutomation:
             except Exception as e:
                 print(f"❌ Error logging into {site_name} (attempt {attempt + 1}): {e}")
                 if attempt < max_retries - 1:
-                    time.sleep(5)
+                    await asyncio.sleep(5)
                     continue
                 else:
                     print(f"❌ Failed to login to {site_name} after {max_retries} attempts")
@@ -406,31 +407,31 @@ class AdvancedAutomation:
                 print(f"❌ Error monitoring {site_name}: {e}")
                 time.sleep(60)
     
-    def start_monitoring(self):
+    async def start_monitoring(self):
         """Start monitoring all sites"""
         print("🚀 Starting Advanced Automation with Telegram Bot...")
         
+        # Setup browser first
+        await self.setup_browser()
+        
         # Login to all sites first
         for site_config in WEBSITES:
-            if self.login_to_site(site_config):
+            if await self.login_to_site(site_config):
                 print(f"✅ {site_config['name']} login successful")
             else:
                 print(f"❌ {site_config['name']} login failed")
-            time.sleep(2)
+            await asyncio.sleep(2)
         
-        # Start monitoring threads
-        threads = []
+        # Start monitoring tasks
+        tasks = []
         for site_config in WEBSITES:
-            thread = threading.Thread(target=self.monitor_site, args=(site_config,))
-            thread.daemon = True
-            thread.start()
-            threads.append(thread)
-            print(f"🧵 Started monitoring thread for {site_config['name']}")
+            task = asyncio.create_task(self.monitor_site(site_config))
+            tasks.append(task)
+            print(f"🧵 Started monitoring task for {site_config['name']}")
         
-        # Keep main thread alive
+        # Keep main task alive
         try:
-            while self.running:
-                time.sleep(1)
+            await asyncio.gather(*tasks)
         except KeyboardInterrupt:
             print("🛑 Stopping automation...")
             self.running = False
