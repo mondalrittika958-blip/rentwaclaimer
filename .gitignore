@@ -49,6 +49,9 @@ logs/
 chromedriver.exe
 chromedriver
 
+# Locked files
+*.exe.lock
+
 # Temporary files
 *.tmp
 *.temp

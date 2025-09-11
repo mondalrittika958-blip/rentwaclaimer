@@ -25,13 +25,25 @@ logger = logging.getLogger(__name__)
 def run_bot():
     """Run the automation bot"""
     try:
-        from run_with_bot import run_automation_with_bot
-        run_automation_with_bot()
+        from simple_automation_requests import SimpleRequestsAutomation
+        from telegram_bot import TelegramBot
+        from webhook_config import get_telegram_bot
+
+        # Initialize Telegram Bot
+        telegram_bot_instance = get_telegram_bot()
+        telegram_bot_thread = threading.Thread(target=telegram_bot_instance.start_polling, daemon=True)
+        telegram_bot_thread.start()
+        logger.info("🤖 Telegram Bot polling started in background.")
+
+        # Start Simple Requests Automation
+        automation = SimpleRequestsAutomation()
+        automation.start_monitoring()
+
     except Exception as e:
         logger.error(f"❌ Bot error: {e}")
         import traceback
         traceback.print_exc()
-        
+
         # Restart after error (for 24/7 operation)
         logger.info("🔄 Restarting bot in 30 seconds...")
         time.sleep(30)

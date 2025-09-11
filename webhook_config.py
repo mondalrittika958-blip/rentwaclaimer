@@ -27,12 +27,19 @@ def send_telegram_message(site_name, amount, action="amount_update"):
         return
     
     try:
-        # Create message
-        emoji = "💰" if action == "amount_update" else "🎯"
-        message = f"{emoji} **{site_name}**\n"
-        message += f"🔄 Action: {action}\n"
-        message += f"💵 Amount: {amount}\n"
-        message += f"⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        # Create message based on action
+        if action == "login_required":
+            emoji = "🔐"
+            message = f"{emoji} **{site_name}**\n"
+            message += f"⚠️ Login Required\n"
+            message += f"🌐 Website requires authentication\n"
+            message += f"⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        else:
+            emoji = "💰" if action == "amount_update" else "🎯"
+            message = f"{emoji} **{site_name}**\n"
+            message += f"🔄 Action: {action}\n"
+            message += f"💵 Amount: {amount}\n"
+            message += f"⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
         
         # Send to Telegram
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
