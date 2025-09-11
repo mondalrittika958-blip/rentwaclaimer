@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 def run_bot():
     """Run the automation bot"""
     try:
-        from simple_automation_requests import SimpleRequestsAutomation
+        from advanced_automation_playwright import AdvancedAutomation, WEBSITES
         from telegram_bot import TelegramBot
         from webhook_config import get_telegram_bot
 
@@ -35,8 +35,8 @@ def run_bot():
         telegram_bot_thread.start()
         logger.info("🤖 Telegram Bot polling started in background.")
 
-        # Start Simple Requests Automation
-        automation = SimpleRequestsAutomation()
+        # Start Advanced Automation
+        automation = AdvancedAutomation()
         automation.start_monitoring()
 
     except Exception as e:

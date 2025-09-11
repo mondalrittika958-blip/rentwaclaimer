@@ -286,6 +286,36 @@ class AdvancedAutomation:
         except Exception as e:
             print(f"❌ Error sending notification for {site_name}: {e}")
     
+    def check_reset_button(self, site_config):
+        """Check if reset button is available"""
+        site_name = site_config["name"]
+        try:
+            reset_button = self.current_page.locator(site_config["reset_button"]).first
+            return reset_button.is_visible()
+        except Exception as e:
+            print(f"❌ Error checking reset button for {site_name}: {e}")
+            return False
+    
+    def click_reset_button(self, site_config):
+        """Click the reset button if available"""
+        site_name = site_config["name"]
+        try:
+            reset_button = self.current_page.locator(site_config["reset_button"]).first
+            reset_button.scroll_into_view_if_needed()
+            time.sleep(1)
+            
+            if reset_button.is_visible():
+                reset_button.click()
+                print(f"✅ Reset button clicked for {site_name}")
+                return True
+            else:
+                print(f"ℹ️ No reset button available for {site_name}")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Error clicking reset button for {site_name}: {e}")
+            return False
+
     def claim_reset_button(self, site_config):
         """Claim the reset button"""
         site_name = site_config["name"]
