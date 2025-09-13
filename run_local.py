@@ -34,9 +34,11 @@ def main():
         bot_thread.start()
         
         # Create automation instance
+        logger.info("🤖 Creating automation instance...")
         automation = AdvancedAutomation()
         
         # Start monitoring
+        logger.info("🌐 Starting website monitoring...")
         automation.start_monitoring()
         
     except KeyboardInterrupt:

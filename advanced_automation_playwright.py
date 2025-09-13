@@ -584,27 +584,36 @@ class AdvancedAutomation:
     def start_monitoring(self):
         """Start monitoring all sites sequentially (no threading)"""
         print("🚀 Starting Advanced Automation with Telegram Bot...")
+        print(f"📊 Will monitor {len(WEBSITES)} websites:")
+        for site in WEBSITES:
+            print(f"  - {site['name']}")
         
         # Monitor sites sequentially to avoid threading issues
         try:
             while self.running:
-                for site_config in WEBSITES:
+                print(f"\n🔄 Starting monitoring round...")
+                for i, site_config in enumerate(WEBSITES, 1):
                     if not self.running:
                         break
                     
-                    print(f"🔍 Monitoring {site_config['name']}...")
+                    print(f"\n🔍 [{i}/{len(WEBSITES)}] Monitoring {site_config['name']}...")
                     self.monitor_site_once(site_config)
                     
                     # Small delay between sites
+                    print(f"⏳ Waiting 5 seconds before next site...")
                     time.sleep(5)
                 
                 # Wait before next round
-                print("⏳ Waiting 1 hour before next monitoring round...")
+                print(f"\n⏳ Round completed. Waiting 1 hour before next monitoring round...")
                 time.sleep(3600)
                 
         except KeyboardInterrupt:
             print("🛑 Stopping automation...")
             self.running = False
+        except Exception as e:
+            print(f"❌ Error in monitoring loop: {e}")
+            import traceback
+            traceback.print_exc()
     
     def stop_monitoring(self):
         """Stop monitoring"""
