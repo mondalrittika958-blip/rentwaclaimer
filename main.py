@@ -8,8 +8,14 @@ import os
 import sys
 import threading
 from flask import Flask
-# Use Playwright automation (same as local)
-from advanced_automation_playwright import AdvancedAutomation
+# Smart import based on environment
+import os
+if os.environ.get('PORT'):  # Running on Render
+    from render_automation import RenderAutomation as AutomationClass
+    automation_type = "Render-optimized"
+else:  # Running locally
+    from advanced_automation_playwright import AdvancedAutomation as AutomationClass
+    automation_type = "Playwright (local)"
 
 # Create Flask app for health check
 app = Flask(__name__)
@@ -34,7 +40,7 @@ def bot_status():
 def run_automation():
     """Run automation in background thread"""
     try:
-        automation = AdvancedAutomation()
+        automation = AutomationClass()
         automation.start_monitoring()
     except Exception as e:
         print(f"❌ Automation error: {e}")
@@ -45,7 +51,7 @@ def main():
     print("📱 Telegram Bot Integration: Enabled")
     print("⏰ Monitoring Interval: 1 hour")
     print("🌐 Websites: kamkg.com, kamate1.com, wha2.net, lootlelo.com")
-    print("🔧 Using Playwright automation (same as local)")
+    print(f"🔧 Using {automation_type} automation")
     
     try:
         # Start automation in background thread
