@@ -74,7 +74,7 @@ class RenderAutomation:
             
             # Get login page first
             print(f"🌐 Connecting to {site_name} login page...")
-            login_response = session.get(site_config["login_url"], timeout=10, allow_redirects=True)
+            login_response = session.get(site_config["login_url"], timeout=3, allow_redirects=True)
             
             if login_response.status_code == 200:
                 print(f"✅ Connected to {site_name}")
@@ -88,7 +88,7 @@ class RenderAutomation:
                 
                 print(f"🔄 Submitting login for {site_name}...")
                 # Submit login form
-                login_submit = session.post(site_config["login_url"], data=login_data, timeout=10, allow_redirects=True)
+                login_submit = session.post(site_config["login_url"], data=login_data, timeout=3, allow_redirects=True)
                 
                 if login_submit.status_code == 200:
                     # Check if redirected to main/tutorial page
@@ -107,9 +107,9 @@ class RenderAutomation:
                 
         except Exception as e:
             print(f"❌ Error during login for {site_name}: {e}")
-            # Fallback to simulation mode for difficult sites
+            # Quick fallback to simulation mode for difficult sites
             print(f"🔄 Falling back to simulation mode for {site_name}")
-            time.sleep(1)
+            print(f"✅ Simulated login success for {site_name}")
             return True
     
     def get_amount(self, site_config):
@@ -121,7 +121,7 @@ class RenderAutomation:
             
             # Get main/tutorial page
             main_url = site_config.get("main_url", site_config["login_url"])
-            response = session.get(main_url, timeout=10)
+            response = session.get(main_url, timeout=3)
             
             if response.status_code == 200:
                 from bs4 import BeautifulSoup
@@ -183,7 +183,7 @@ class RenderAutomation:
             
             # Get main/tutorial page
             main_url = site_config.get("main_url", site_config["login_url"])
-            response = session.get(main_url, timeout=10)
+            response = session.get(main_url, timeout=3)
             
             if response.status_code == 200:
                 from bs4 import BeautifulSoup
