@@ -44,6 +44,22 @@ def main():
         
         # Start monitoring
         logger.info("🌐 Starting website monitoring...")
+        
+        # Test browser automation first
+        logger.info("🧪 Testing browser automation...")
+        try:
+            from advanced_automation_playwright import WEBSITES
+            test_site = WEBSITES[0]  # kamkg.com
+            logger.info(f"🔍 Testing with {test_site['name']}")
+            automation.monitor_site_once(test_site)
+            logger.info("✅ Browser automation test completed")
+        except Exception as e:
+            logger.error(f"❌ Browser automation test failed: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        # Start full monitoring
+        logger.info("🚀 Starting full monitoring...")
         automation.start_monitoring()
         
     except KeyboardInterrupt:
