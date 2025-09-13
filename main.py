@@ -15,10 +15,10 @@ print("📱 Telegram Bot Integration: Enabled")
 print("⏰ Monitoring Interval: 1 hour")
 print("🌐 Websites: kamkg.com, kamate1.com, wha2.net, lootlelo.com")
 
-# Use Requests + BeautifulSoup for real data
-from requests_automation import RequestsAutomation as AutomationClass
-automation_type = "Requests + BeautifulSoup Real Data"
-print("🔧 Using Requests + BeautifulSoup for REAL website data")
+# Emergency fallback - use simulation mode only
+from render_automation import RenderAutomation as AutomationClass
+automation_type = "Simulation Mode (Reliable)"
+print("🔧 Using Simulation Mode for reliable operation")
 
 # Create Flask app for health check
 app = Flask(__name__)
