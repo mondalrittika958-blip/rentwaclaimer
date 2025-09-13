@@ -21,6 +21,11 @@ def main():
         logger.info("🚀 Starting Website Monitor Bot...")
         logger.info(f"⏰ Start time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
         
+        # Run tests first
+        logger.info("🧪 Running system tests...")
+        from test_render import main as test_main
+        test_main()
+        
         # Start health server in background (for Render)
         if os.environ.get('PORT'):
             logger.info("🏥 Starting health server...")
