@@ -257,6 +257,7 @@ class AdvancedAutomation:
     def click_reset_button(self, site_config):
         """Click the reset button if available"""
         site_name = site_config["name"]
+        print(f"🔍 [click_reset_button] Starting reset button search for {site_name}")
         try:
             # Try multiple selectors for reset button
             reset_selectors = [
@@ -270,11 +271,15 @@ class AdvancedAutomation:
                 "//*[contains(text(), 'Reset')]"
             ]
             
-            for selector in reset_selectors:
+            print(f"🔍 [click_reset_button] Trying {len(reset_selectors)} selectors for {site_name}")
+            for i, selector in enumerate(reset_selectors, 1):
                 try:
+                    print(f"🔍 [click_reset_button] [{i}/{len(reset_selectors)}] Trying selector: {selector}")
                     reset_button = self.current_page.locator(selector).first
+                    print(f"🔍 [click_reset_button] Found element with selector: {selector}")
                     if reset_button.is_visible():
-                        print(f"🎯 Trying to click reset button with selector: {selector}")
+                        print(f"✅ [click_reset_button] Reset button is visible with selector: {selector}")
+                        print(f"🎯 [click_reset_button] Attempting to click reset button for {site_name}")
                         
                         # Scroll into view
                         reset_button.scroll_into_view_if_needed()
@@ -282,30 +287,32 @@ class AdvancedAutomation:
                         
                         # Try normal click
                         try:
+                            print(f"🖱️ [click_reset_button] Attempting normal click for {site_name}")
                             reset_button.click()
-                            print(f"✅ Reset button clicked successfully for {site_name}")
+                            print(f"✅ [click_reset_button] Reset button clicked successfully for {site_name}")
                             return True
                         except Exception as e:
-                            print(f"⚠️ Normal click failed: {e}")
+                            print(f"⚠️ [click_reset_button] Normal click failed for {site_name}: {e}")
                             
                             # Try JavaScript click
                             try:
+                                print(f"🖱️ [click_reset_button] Attempting JavaScript click for {site_name}")
                                 page.evaluate("arguments[0].click()", reset_button.element_handle())
-                                print(f"✅ JavaScript click successful for {site_name}")
+                                print(f"✅ [click_reset_button] JavaScript click successful for {site_name}")
                                 return True
                             except Exception as e2:
-                                print(f"❌ JavaScript click failed: {e2}")
+                                print(f"❌ [click_reset_button] JavaScript click failed for {site_name}: {e2}")
                                 continue
                                 
                 except Exception as e:
                     print(f"❌ Selector error: {e}")
                     continue
             
-            print(f"ℹ️ No clickable reset button found for {site_name}")
+            print(f"ℹ️ [click_reset_button] No clickable reset button found for {site_name}")
             return False
                 
         except Exception as e:
-            print(f"❌ Error clicking reset button for {site_name}: {e}")
+            print(f"❌ [click_reset_button] Error clicking reset button for {site_name}: {e}")
             return False
 
     def claim_reset_button(self, site_config):
