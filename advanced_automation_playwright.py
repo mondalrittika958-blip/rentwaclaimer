@@ -218,7 +218,16 @@ class AdvancedAutomation:
         try:
             from telegram_bot import TelegramBot
             bot = TelegramBot()
-            bot.send_message(f"💰 {site_name}\n🔄 Action: {action}\n💵 Amount: {amount}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            # Create detailed message based on action
+            if action == "reset_claimed":
+                message = f"🔄 {site_name}\n✅ Action: Reset Button Claimed\n💵 Amount: {amount}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\n🎉 Reset button successfully clicked!"
+            elif action == "reset_not_found":
+                message = f"🔄 {site_name}\n❌ Action: Reset Button Not Found\n💵 Amount: {amount}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\nℹ️ No reset button available at this time"
+            else:
+                message = f"💰 {site_name}\n🔄 Action: {action}\n💵 Amount: {amount}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}"
+            
+            bot.send_message(message)
         except Exception as e:
             print(f"❌ Error sending notification for {site_name}: {e}")
     
@@ -574,18 +583,24 @@ class AdvancedAutomation:
                 else:
                     print(f"❌ [monitor_site_once] No amount found for {site_name}")
                 
-                # Check reset button
+                # Check reset button every 1 hour
                 current_time = datetime.now()
                 print(f"🔄 [monitor_site_once] Checking reset button eligibility for {site_name}")
                 if site_name not in self.last_reset_times or \
-                   current_time - self.last_reset_times[site_name] >= timedelta(hours=2):
+                   current_time - self.last_reset_times[site_name] >= timedelta(hours=1):
                     
                     print(f"🔄 [monitor_site_once] Reset button is eligible for {site_name}")
                     if self.claim_reset_button(site_config):
                         self.last_reset_times[site_name] = current_time
                         print(f"✅ [monitor_site_once] Reset button claimed for {site_name}")
+                        # Send notification for successful reset button claim
+                        self.send_amount_update(site_name, "Reset button claimed", "reset_claimed")
+                        print(f"📱 [monitor_site_once] Reset button claim notification sent for {site_name}")
                     else:
                         print(f"❌ [monitor_site_once] Reset button claim failed for {site_name}")
+                        # Send notification for failed reset button claim
+                        self.send_amount_update(site_name, "Reset button not found", "reset_not_found")
+                        print(f"📱 [monitor_site_once] Reset button not found notification sent for {site_name}")
                 else:
                     print(f"⏰ [monitor_site_once] Reset button not yet eligible for {site_name}")
             else:
