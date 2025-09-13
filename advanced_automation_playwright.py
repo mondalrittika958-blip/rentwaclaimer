@@ -486,6 +486,7 @@ class AdvancedAutomation:
     def monitor_site_once(self, site_config):
         """Monitor a single site once (no threading)"""
         site_name = site_config["name"]
+        print(f"🔍 [monitor_site_once] Starting monitoring for {site_name}")
         
         # Create complete playwright instance
         playwright = None
@@ -494,12 +495,14 @@ class AdvancedAutomation:
         page = None
         
         try:
+            print(f"🎭 [monitor_site_once] Creating playwright instance for {site_name}")
             # Create playwright instance
             playwright = sync_playwright().start()
             
             # Launch browser
+            print(f"🌐 [monitor_site_once] Launching browser for {site_name}")
             browser = playwright.chromium.launch(
-                headless=False,
+                headless=True,  # Set to True for Render
                 args=[
                     '--no-sandbox',
                     '--disable-dev-shm-usage',
@@ -511,24 +514,30 @@ class AdvancedAutomation:
                     '--start-maximized'
                 ]
             )
+            print(f"✅ [monitor_site_once] Browser launched for {site_name}")
             
             # Create context
+            print(f"📱 [monitor_site_once] Creating context for {site_name}")
             context = browser.new_context(
                 viewport={'width': 375, 'height': 667},
                 user_agent='Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
             )
+            print(f"✅ [monitor_site_once] Context created for {site_name}")
             
             # Create page
+            print(f"📄 [monitor_site_once] Creating page for {site_name}")
             page = context.new_page()
             page.set_default_timeout(60000)
             page.set_default_navigation_timeout(60000)
+            print(f"✅ [monitor_site_once] Page created for {site_name}")
             
             # Set current page for login functions
             self.current_page = page
             
             # Navigate to login page
-            print(f"🌐 Navigating to {site_config['url']}")
+            print(f"🌐 [monitor_site_once] Navigating to {site_config['url']} for {site_name}")
             page.goto(site_config["url"], timeout=60000)
+            print(f"✅ [monitor_site_once] Navigation completed for {site_name}")
             
             # Wait for page load
             try:
