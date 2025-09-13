@@ -24,6 +24,13 @@ def main():
         logger.info("🏥 Starting health server...")
         run_health_server()
         
+        # Start Telegram bot in background
+        logger.info("🤖 Starting Telegram bot...")
+        from telegram_bot import TelegramBot
+        bot = TelegramBot()
+        bot_thread = threading.Thread(target=bot.start_polling, daemon=True)
+        bot_thread.start()
+        
         # Create automation instance
         automation = AdvancedAutomation()
         

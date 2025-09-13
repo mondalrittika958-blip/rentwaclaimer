@@ -6,8 +6,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get configuration from environment variables or use defaults
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8251061362:AAF0NHiKhVqvx8fMBsVNj9wwAjG4GtKiZk8")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1003095344192")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "YOUR_BOT_TOKEN_HERE")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "YOUR_CHAT_ID_HERE")
 
 def send_telegram_message(site_name, amount, action="amount_update"):
     """

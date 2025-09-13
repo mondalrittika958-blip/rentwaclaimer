@@ -13,6 +13,11 @@ class TelegramBot:
         self.last_update_id = 0
         self.running = False
         
+        # Debug info
+        print(f"🤖 Telegram Bot initialized")
+        print(f"📱 Bot Token: {self.bot_token[:10]}...")
+        print(f"💬 Chat ID: {self.chat_id}")
+        
     def send_message(self, text, parse_mode="HTML"):
         """Send message to Telegram with rate limiting"""
         if self.bot_token == "YOUR_BOT_TOKEN_HERE" or self.chat_id == "YOUR_CHAT_ID_HERE":

@@ -216,7 +216,9 @@ class AdvancedAutomation:
     def send_amount_update(self, site_name, amount, action):
         """Send amount update to Telegram"""
         try:
-            send_notification_via_polling(site_name, amount, action)
+            from telegram_bot import TelegramBot
+            bot = TelegramBot()
+            bot.send_message(f"💰 {site_name}\n🔄 Action: {action}\n💵 Amount: {amount}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
         except Exception as e:
             print(f"❌ Error sending notification for {site_name}: {e}")
     

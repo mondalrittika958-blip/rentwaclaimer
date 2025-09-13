@@ -7,6 +7,8 @@ services:
     startCommand: python main.py
     healthCheckPath: /health
     envVars:
+      - key: PORT
+        value: 10000
       - key: TELEGRAM_BOT_TOKEN
         value: 8251061362:AAF0NHiKhVqvx8fMBsVNj9wwAjG4GtKiZk8
       - key: TELEGRAM_CHAT_ID

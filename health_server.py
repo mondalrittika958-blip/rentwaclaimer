@@ -61,8 +61,10 @@ class HealthHandler(BaseHTTPRequestHandler):
 def start_health_server():
     """Start the health check server"""
     try:
-        server = HTTPServer(('0.0.0.0', 10000), HealthHandler)
-        print("🏥 Health server started on port 10000")
+        import os
+        port = int(os.environ.get('PORT', 10000))
+        server = HTTPServer(('0.0.0.0', port), HealthHandler)
+        print(f"🏥 Health server started on port {port}")
         server.serve_forever()
     except Exception as e:
         print(f"❌ Health server error: {e}")
