@@ -49,12 +49,33 @@ def bot_status():
     }
 
 def run_automation():
-    """Run automation in background thread"""
+    """Run automation in background thread with fallback"""
     try:
         automation = AutomationClass()
+        if hasattr(automation, 'setup_driver'):
+            # Selenium automation - check if WebDriver setup succeeds
+            if not automation.setup_driver():
+                print("🔄 Selenium failed, trying Playwright fallback...")
+                try:
+                    from advanced_automation_playwright import AdvancedAutomation
+                    automation = AdvancedAutomation()
+                    print("✅ Switched to Playwright automation")
+                except Exception as e2:
+                    print(f"❌ Playwright also failed: {e2}")
+                    from render_automation import RenderAutomation
+                    automation = RenderAutomation()
+                    print("⚠️ Using simulation mode as last resort")
+        
         automation.start_monitoring()
     except Exception as e:
         print(f"❌ Automation error: {e}")
+        print("🔄 Trying emergency fallback...")
+        try:
+            from render_automation import RenderAutomation
+            automation = RenderAutomation()
+            automation.start_monitoring()
+        except Exception as e2:
+            print(f"❌ All automation methods failed: {e2}")
 
 def main():
     """Main function to start the automation"""

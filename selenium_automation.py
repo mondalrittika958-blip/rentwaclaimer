@@ -54,15 +54,17 @@ class SeleniumAutomation:
         print("🚀 Selenium Real Website Automation initialized")
         
     def setup_driver(self):
-        """Setup Chrome WebDriver with optimized settings"""
+        """Setup Chrome WebDriver with WebDriver Manager"""
         try:
+            from webdriver_manager.chrome import ChromeDriverManager
+            from selenium.webdriver.chrome.service import Service
+            
             chrome_options = Options()
             
             # Check if running on Render
             is_render = os.environ.get('PORT') is not None
             
             if is_render:
-                # Render-specific Chrome setup
                 print("🔧 Setting up Chrome for Render deployment...")
                 chrome_options.add_argument("--headless=new")
                 chrome_options.add_argument("--no-sandbox")
@@ -70,28 +72,9 @@ class SeleniumAutomation:
                 chrome_options.add_argument("--disable-gpu")
                 chrome_options.add_argument("--disable-setuid-sandbox")
                 chrome_options.add_argument("--remote-debugging-port=9222")
-                
-                # Try to find Chrome binary
-                chrome_paths = [
-                    "/usr/bin/google-chrome",
-                    "/usr/bin/chromium-browser", 
-                    "/usr/bin/chrome",
-                    "/opt/google/chrome/chrome"
-                ]
-                
-                chrome_binary = None
-                for path in chrome_paths:
-                    if os.path.exists(path):
-                        chrome_binary = path
-                        break
-                
-                if chrome_binary:
-                    chrome_options.binary_location = chrome_binary
-                    print(f"✅ Found Chrome binary: {chrome_binary}")
-                else:
-                    print("⚠️ Chrome binary not found, using default")
+                chrome_options.add_argument("--disable-web-security")
+                chrome_options.add_argument("--allow-running-insecure-content")
             else:
-                # Local development setup
                 print("🔧 Setting up Chrome for local development...")
                 chrome_options.add_argument("--window-size=1366,768")
                 chrome_options.add_argument("--start-maximized")
@@ -102,8 +85,13 @@ class SeleniumAutomation:
             chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
             chrome_options.add_experimental_option('useAutomationExtension', False)
             
-            # Create driver
-            self.driver = webdriver.Chrome(options=chrome_options)
+            # Use WebDriver Manager to handle ChromeDriver
+            print("🔧 Downloading/updating ChromeDriver...")
+            service = Service(ChromeDriverManager().install())
+            
+            # Create driver with timeout
+            print("🔧 Creating WebDriver instance...")
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
             self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
             
             print("✅ Chrome WebDriver initialized successfully")
@@ -111,6 +99,7 @@ class SeleniumAutomation:
             
         except Exception as e:
             print(f"❌ Failed to setup Chrome WebDriver: {e}")
+            print("🔄 Falling back to Playwright...")
             return False
     
     def login_to_site(self, site_config):
