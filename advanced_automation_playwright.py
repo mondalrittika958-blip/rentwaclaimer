@@ -641,8 +641,8 @@ class AdvancedAutomation:
                     
                     print(f"\n🔍 [start_monitoring] [{i}/{len(WEBSITES)}] Monitoring {site_config['name']}...")
                     print(f"🌐 [start_monitoring] URL: {site_config['url']}")
-                    print(f"🔑 [start_monitoring] Username: {site_config['username']}")
-                    print(f"🔐 [start_monitoring] Password: {'*' * len(site_config['password'])}")
+                    print(f"🔑 [start_monitoring] Username: {site_config.get('username', 'N/A')}")
+                    print(f"🔐 [start_monitoring] Password: {'*' * len(site_config.get('password', ''))}")
                     self.monitor_site_once(site_config)
                     
                     # Small delay between sites
@@ -660,6 +660,9 @@ class AdvancedAutomation:
             print(f"❌ Error in monitoring loop: {e}")
             import traceback
             traceback.print_exc()
+            # Continue monitoring even if there's an error
+            print("🔄 Continuing monitoring after error...")
+            time.sleep(60)  # Wait 1 minute before retrying
     
     def stop_monitoring(self):
         """Stop monitoring"""
