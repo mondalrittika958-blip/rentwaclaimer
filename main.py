@@ -8,8 +8,8 @@ import os
 import sys
 import threading
 from flask import Flask
-# Use simple requests automation for Render compatibility
-from simple_automation_requests import SimpleAutomation
+# Use Playwright automation (same as local)
+from advanced_automation_playwright import AdvancedAutomation
 
 # Create Flask app for health check
 app = Flask(__name__)
@@ -34,7 +34,7 @@ def bot_status():
 def run_automation():
     """Run automation in background thread"""
     try:
-        automation = SimpleAutomation()
+        automation = AdvancedAutomation()
         automation.start_monitoring()
     except Exception as e:
         print(f"❌ Automation error: {e}")
@@ -45,7 +45,7 @@ def main():
     print("📱 Telegram Bot Integration: Enabled")
     print("⏰ Monitoring Interval: 1 hour")
     print("🌐 Websites: kamkg.com, kamate1.com, wha2.net, lootlelo.com")
-    print("🔧 Using Requests-based automation for Render compatibility")
+    print("🔧 Using Playwright automation (same as local)")
     
     try:
         # Start automation in background thread

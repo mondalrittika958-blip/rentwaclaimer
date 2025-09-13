@@ -346,21 +346,43 @@ class AdvancedAutomation:
             # Each thread gets its own playwright instance
             playwright = sync_playwright().start()
             
-            # Launch browser for this thread (headless for Render)
-            browser = playwright.chromium.launch(
-                headless=True,  # Must be True for Render deployment
-                args=[
-                    '--no-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-blink-features=AutomationControlled',
-                    '--disable-web-security',
-                    '--disable-features=VizDisplayCompositor',
-                    '--disable-gpu',
+            # Launch browser for this thread
+            # Check if running on Render (online) or local
+            is_render = os.environ.get('RENDER') is not None or os.environ.get('PORT') is not None
+            
+            browser_args = [
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-blink-features=AutomationControlled',
+                '--disable-web-security',
+                '--disable-features=VizDisplayCompositor',
+                '--disable-gpu'
+            ]
+            
+            if is_render:
+                # Additional args for Render deployment
+                browser_args.extend([
                     '--disable-setuid-sandbox',
                     '--no-zygote',
                     '--single-process',
+                    '--disable-extensions',
+                    '--disable-plugins',
+                    '--disable-images',
+                    '--disable-javascript',
                     '--window-size=1366,768'
-                ]
+                ])
+                print(f"🌐 Launching browser for {site_name} (Render mode)")
+            else:
+                # Local development args
+                browser_args.extend([
+                    '--window-size=1366,768',
+                    '--start-maximized'
+                ])
+                print(f"🌐 Launching browser for {site_name} (Local mode)")
+            
+            browser = playwright.chromium.launch(
+                headless=is_render,  # Headless on Render, visible locally
+                args=browser_args
             )
             
             # Create context for this thread
@@ -499,22 +521,42 @@ class AdvancedAutomation:
             print(f"🚀 Creating Playwright instance for {site_name}")
             playwright = sync_playwright().start()
             
-            # Launch browser (headless for Render deployment)
-            print(f"🌐 Launching browser for {site_name}")
-            browser = playwright.chromium.launch(
-                headless=True,  # Must be True for Render
-                args=[
-                    '--no-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-blink-features=AutomationControlled',
-                    '--disable-web-security',
-                    '--disable-features=VizDisplayCompositor',
-                    '--disable-gpu',
+            # Launch browser  
+            # Check if running on Render (online) or local
+            is_render = os.environ.get('RENDER') is not None or os.environ.get('PORT') is not None
+            
+            browser_args = [
+                '--no-sandbox',
+                '--disable-dev-shm-usage', 
+                '--disable-blink-features=AutomationControlled',
+                '--disable-web-security',
+                '--disable-features=VizDisplayCompositor',
+                '--disable-gpu'
+            ]
+            
+            if is_render:
+                # Additional args for Render deployment
+                browser_args.extend([
                     '--disable-setuid-sandbox',
-                    '--no-zygote',
+                    '--no-zygote', 
                     '--single-process',
+                    '--disable-extensions',
+                    '--disable-plugins',
+                    '--disable-images',
                     '--window-size=1366,768'
-                ]
+                ])
+                print(f"🌐 Launching browser for {site_name} (Render mode)")
+            else:
+                # Local development args
+                browser_args.extend([
+                    '--window-size=1366,768',
+                    '--start-maximized'
+                ])
+                print(f"🌐 Launching browser for {site_name} (Local mode)")
+            
+            browser = playwright.chromium.launch(
+                headless=is_render,  # Headless on Render, visible locally
+                args=browser_args
             )
             
             # Create context
