@@ -23,7 +23,7 @@ def main():
         
         # Run tests first
         logger.info("🧪 Running system tests...")
-        from test_render import main as test_main
+        from simple_test import main as test_main
         test_main()
         
         # Start health server in background (for Render)
