@@ -346,9 +346,9 @@ class AdvancedAutomation:
             # Each thread gets its own playwright instance
             playwright = sync_playwright().start()
             
-            # Launch browser for this thread
+            # Launch browser for this thread (headless for Render)
             browser = playwright.chromium.launch(
-                headless=False,  # Set to False for local testing
+                headless=True,  # Must be True for Render deployment
                 args=[
                     '--no-sandbox',
                     '--disable-dev-shm-usage',
@@ -356,8 +356,10 @@ class AdvancedAutomation:
                     '--disable-web-security',
                     '--disable-features=VizDisplayCompositor',
                     '--disable-gpu',
-                    '--window-size=1366,768',
-                    '--start-maximized'
+                    '--disable-setuid-sandbox',
+                    '--no-zygote',
+                    '--single-process',
+                    '--window-size=1366,768'
                 ]
             )
             
@@ -484,6 +486,7 @@ class AdvancedAutomation:
     def monitor_site_once(self, site_config):
         """Monitor a single site once (no threading)"""
         site_name = site_config["name"]
+        print(f"🔍 Starting monitoring for {site_name}")
         
         # Create complete playwright instance
         playwright = None
@@ -493,11 +496,13 @@ class AdvancedAutomation:
         
         try:
             # Create playwright instance
+            print(f"🚀 Creating Playwright instance for {site_name}")
             playwright = sync_playwright().start()
             
-            # Launch browser
+            # Launch browser (headless for Render deployment)
+            print(f"🌐 Launching browser for {site_name}")
             browser = playwright.chromium.launch(
-                headless=False,
+                headless=True,  # Must be True for Render
                 args=[
                     '--no-sandbox',
                     '--disable-dev-shm-usage',
@@ -505,8 +510,10 @@ class AdvancedAutomation:
                     '--disable-web-security',
                     '--disable-features=VizDisplayCompositor',
                     '--disable-gpu',
-                    '--window-size=1366,768',
-                    '--start-maximized'
+                    '--disable-setuid-sandbox',
+                    '--no-zygote',
+                    '--single-process',
+                    '--window-size=1366,768'
                 ]
             )
             

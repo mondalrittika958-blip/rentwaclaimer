@@ -2,7 +2,7 @@ services:
   - type: web
     name: rentwaclaimer-bot
     env: python
-    buildCommand: pip install -r requirements.txt && playwright install chromium
+    buildCommand: pip install -r requirements.txt && playwright install chromium && playwright install-deps
     startCommand: python main.py
     plan: free
     envVars:
