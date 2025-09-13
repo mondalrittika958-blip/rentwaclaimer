@@ -8,28 +8,17 @@ import os
 import sys
 import threading
 from flask import Flask
-# Force Playwright for Render - skip Selenium completely
+# Emergency fallback - use simulation mode only
 import os
-try:
-    # Skip Selenium on Render - go directly to Playwright
-    if os.environ.get('PORT'):  # Running on Render
-        from advanced_automation_playwright import AdvancedAutomation as AutomationClass
-        automation_type = "Playwright Real Website Automation (Render)"
-        print("🚀 Using Playwright for REAL website data on Render")
-    else:  # Local development
-        try:
-            from selenium_automation import SeleniumAutomation as AutomationClass
-            automation_type = "Selenium Real Website Automation (Local)"
-            print("🚀 Using Selenium for REAL website data locally")
-        except:
-            from advanced_automation_playwright import AdvancedAutomation as AutomationClass
-            automation_type = "Playwright Real Website Automation (Local)"
-            print("🚀 Using Playwright for REAL website data locally")
-except Exception as e:
-    print(f"❌ Playwright failed: {e}")
-    from render_automation import RenderAutomation as AutomationClass
-    automation_type = "Simulation Mode (Last Resort)"
-    print("⚠️ Using simulation mode as last resort")
+print("🚀 Starting Automation Bot...")
+print("📱 Telegram Bot Integration: Enabled")
+print("⏰ Monitoring Interval: 1 hour")
+print("🌐 Websites: kamkg.com, kamate1.com, wha2.net, lootlelo.com")
+
+# Use Requests + BeautifulSoup for real data
+from requests_automation import RequestsAutomation as AutomationClass
+automation_type = "Requests + BeautifulSoup Real Data"
+print("🔧 Using Requests + BeautifulSoup for REAL website data")
 
 # Create Flask app for health check
 app = Flask(__name__)
