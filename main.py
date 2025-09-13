@@ -8,14 +8,25 @@ import os
 import sys
 import threading
 from flask import Flask
-# Smart import based on environment
+# Smart automation selection - Real website data preferred
 import os
-if os.environ.get('PORT'):  # Running on Render
-    from render_automation import RenderAutomation as AutomationClass
-    automation_type = "Render-optimized"
-else:  # Running locally
-    from advanced_automation_playwright import AdvancedAutomation as AutomationClass
-    automation_type = "Playwright (local)"
+try:
+    # Try Selenium first for real website automation
+    from selenium_automation import SeleniumAutomation as AutomationClass
+    automation_type = "Selenium Real Website Automation"
+    print("🚀 Using Selenium for REAL website data")
+except Exception as e:
+    print(f"❌ Selenium import failed: {e}")
+    try:
+        # Fallback to Playwright
+        from advanced_automation_playwright import AdvancedAutomation as AutomationClass
+        automation_type = "Playwright Real Website Automation"
+        print("🚀 Using Playwright for REAL website data")
+    except Exception as e2:
+        print(f"❌ Playwright also failed: {e2}")
+        from render_automation import RenderAutomation as AutomationClass
+        automation_type = "Simulation Mode (Last Resort)"
+        print("⚠️ Using simulation mode as last resort")
 
 # Create Flask app for health check
 app = Flask(__name__)
