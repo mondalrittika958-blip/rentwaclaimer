@@ -556,28 +556,40 @@ class AdvancedAutomation:
             time.sleep(3)
             
             # Try to login
+            print(f"🔐 [monitor_site_once] Attempting login for {site_name}")
             if self.login_to_site(site_config):
-                print(f"✅ Login successful for {site_name}")
+                print(f"✅ [monitor_site_once] Login successful for {site_name}")
                 
                 # Handle popup
+                print(f"🔍 [monitor_site_once] Checking for popups on {site_name}")
                 self.handle_popup_if_present(site_config)
                 
                 # Get amount
+                print(f"💰 [monitor_site_once] Getting amount for {site_name}")
                 amount = self.get_amount(site_config)
                 if amount:
+                    print(f"✅ [monitor_site_once] Amount retrieved for {site_name}: {amount}")
                     self.send_amount_update(site_name, amount, "amount_update")
-                    print(f"💰 {site_name} amount: {amount}")
+                    print(f"📱 [monitor_site_once] Telegram notification sent for {site_name}")
+                else:
+                    print(f"❌ [monitor_site_once] No amount found for {site_name}")
                 
                 # Check reset button
                 current_time = datetime.now()
+                print(f"🔄 [monitor_site_once] Checking reset button eligibility for {site_name}")
                 if site_name not in self.last_reset_times or \
                    current_time - self.last_reset_times[site_name] >= timedelta(hours=2):
                     
+                    print(f"🔄 [monitor_site_once] Reset button is eligible for {site_name}")
                     if self.claim_reset_button(site_config):
                         self.last_reset_times[site_name] = current_time
-                        print(f"🔄 Reset button claimed for {site_name}")
+                        print(f"✅ [monitor_site_once] Reset button claimed for {site_name}")
+                    else:
+                        print(f"❌ [monitor_site_once] Reset button claim failed for {site_name}")
+                else:
+                    print(f"⏰ [monitor_site_once] Reset button not yet eligible for {site_name}")
             else:
-                print(f"❌ Login failed for {site_name}")
+                print(f"❌ [monitor_site_once] Login failed for {site_name}")
                 
         except Exception as e:
             print(f"❌ Error monitoring {site_name}: {e}")
@@ -607,12 +619,15 @@ class AdvancedAutomation:
         # Monitor sites sequentially to avoid threading issues
         try:
             while self.running:
-                print(f"\n🔄 Starting monitoring round...")
+                print(f"\n🔄 [start_monitoring] Starting monitoring round...")
                 for i, site_config in enumerate(WEBSITES, 1):
                     if not self.running:
                         break
                     
-                    print(f"\n🔍 [{i}/{len(WEBSITES)}] Monitoring {site_config['name']}...")
+                    print(f"\n🔍 [start_monitoring] [{i}/{len(WEBSITES)}] Monitoring {site_config['name']}...")
+                    print(f"🌐 [start_monitoring] URL: {site_config['url']}")
+                    print(f"🔑 [start_monitoring] Username: {site_config['username']}")
+                    print(f"🔐 [start_monitoring] Password: {'*' * len(site_config['password'])}")
                     self.monitor_site_once(site_config)
                     
                     # Small delay between sites
