@@ -6,7 +6,37 @@ This file is used for Render deployment
 
 import os
 import sys
+import threading
+from flask import Flask
 from advanced_automation_playwright import AdvancedAutomation
+
+# Create Flask app for health check
+app = Flask(__name__)
+
+@app.route('/')
+def health_check():
+    return {
+        "status": "running",
+        "service": "Website Monitor Bot",
+        "message": "Bot is monitoring 4 websites 24/7"
+    }
+
+@app.route('/status')
+def bot_status():
+    return {
+        "bot_status": "active",
+        "websites": ["kamkg.com", "kamate1.com", "wha2.net", "lootlelo.com"],
+        "monitoring_interval": "1 hour",
+        "telegram_integration": "enabled"
+    }
+
+def run_automation():
+    """Run automation in background thread"""
+    try:
+        automation = AdvancedAutomation()
+        automation.start_monitoring()
+    except Exception as e:
+        print(f"❌ Automation error: {e}")
 
 def main():
     """Main function to start the automation"""
@@ -16,11 +46,15 @@ def main():
     print("🌐 Websites: kamkg.com, kamate1.com, wha2.net, lootlelo.com")
     
     try:
-        # Create automation instance
-        automation = AdvancedAutomation()
+        # Start automation in background thread
+        automation_thread = threading.Thread(target=run_automation, daemon=True)
+        automation_thread.start()
+        print("✅ Automation started in background")
         
-        # Start monitoring
-        automation.start_monitoring()
+        # Start Flask health check server
+        port = int(os.environ.get("PORT", 10000))
+        print(f"🏥 Starting health check server on port {port}")
+        app.run(host="0.0.0.0", port=port, debug=False)
         
     except KeyboardInterrupt:
         print("🛑 Bot stopped by user")
