@@ -20,14 +20,6 @@ def main():
         logger.info("🚀 Starting Website Monitor Bot...")
         logger.info(f"⏰ Start time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
         
-        # Run debug check
-        logger.info("🔍 Running Render debug check...")
-        try:
-            from debug_render import debug_render
-            debug_render()
-        except Exception as e:
-            logger.error(f"❌ Debug check failed: {e}")
-        
         # Start health server in background
         logger.info("🏥 Starting health server...")
         run_health_server()

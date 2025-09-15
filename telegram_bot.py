@@ -225,19 +225,38 @@ All sites are being monitored 24/7 for:
     def handle_amounts(self, chat_id, username):
         """Handle amounts request"""
         try:
-            amount_msg = """
-💰 **Current Amounts:**
+            if not self.automation:
+                self.send_message("❌ Automation not available. Please try again later.", chat_id=chat_id)
+                return
+            
+            # Get total amounts from automation
+            total, amount_details = self.automation.get_total_amounts()
+            
+            if amount_details:
+                amount_msg = f"""💰 **Total Amounts (Last Monitoring):**
 
-This feature will show real-time amounts from all websites when the monitoring system is active.
+🔢 **Total Sum: {total:,.2f}**
 
-Amounts are automatically sent when:
-• Reset button is claimed
-• Amount changes detected
-• Login successful
-            """
+📊 **Breakdown:**
+{chr(10).join(amount_details)}
+
+⏰ **Last Updated:** From most recent monitoring round
+🔄 **Auto-Update:** Values refresh during monitoring cycles
+                """
+            else:
+                amount_msg = """💰 **Total Amounts:**
+
+⚠️ **No amounts available yet**
+
+Amounts will be available after the first monitoring round.
+• Monitoring runs every hour at 5 minutes past
+• Use "🔄 Monitor Now" for immediate update
+                """
+            
             self.send_message(amount_msg, reply_markup=self.get_main_menu(), chat_id=chat_id)
         except Exception as e:
             print(f"❌ Error in amounts: {e}")
+            self.send_message("❌ Error getting amounts information.", reply_markup=self.get_main_menu(), chat_id=chat_id)
 
     def handle_help(self, chat_id, username):
         """Handle help request"""

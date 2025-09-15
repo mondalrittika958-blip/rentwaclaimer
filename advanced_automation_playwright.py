@@ -62,6 +62,7 @@ WEBSITES = [
 class AdvancedAutomation:
     def __init__(self):
         self.last_reset_times = {}
+        self.last_amounts = {}  # Store last monitored amounts for each site
         self.running = True
         print("🚀 Automation initialized, browsers will be created per thread")
     
@@ -212,6 +213,22 @@ class AdvancedAutomation:
         except Exception as e:
             print(f"❌ Error getting amount for {site_name}: {e}")
             return None
+    
+    def get_total_amounts(self):
+        """Calculate total of all last monitored amounts"""
+        total = 0.0
+        amount_details = []
+        
+        for site_name, amount_str in self.last_amounts.items():
+            try:
+                # Extract numeric value from amount string
+                amount_num = float(amount_str.replace(',', ''))
+                total += amount_num
+                amount_details.append(f"• {site_name}: {amount_str}")
+            except (ValueError, AttributeError):
+                amount_details.append(f"• {site_name}: {amount_str} (invalid)")
+        
+        return total, amount_details
     
     def send_amount_update(self, site_name, message, action):
         """Send amount update to Telegram Channel or Bot"""
@@ -452,9 +469,10 @@ class AdvancedAutomation:
                     # Get current amount
                     amount = self.get_amount(site_config)
                     if amount:
-                        # Only send update if amount changed or it's been a while
+                        # Only log amount, don't send notification for simple amounts
                         if last_amount_check != amount:
-                            self.send_amount_update(site_name, amount, "amount_update")
+                            # Store amount for total calculation
+                            self.last_amounts[site_name] = amount
                             print(f"💰 {site_name} amount: {amount}")
                             last_amount_check = amount
                     else:
