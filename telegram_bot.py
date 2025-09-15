@@ -356,6 +356,9 @@ Bot is running and monitoring all websites 24/7!
             return
             
         print("🤖 Starting Telegram Bot (Polling Method)...")
+        print(f"🔧 Bot Token: {self.bot_token[:15]}...")
+        print(f"📢 Channel ID: {self.chat_id}")  
+        print(f"👤 User Chat ID: {self.user_chat_id}")
         self.running = True
         
         # Wait a bit for bot to fully initialize
@@ -392,16 +395,25 @@ Bot is running and monitoring all websites 24/7!
             try:
                 updates = self.get_updates()
                 
+                if updates:
+                    print(f"📨 Processing {len(updates)} updates...")
+                
                 for update in updates:
                     self.last_update_id = update["update_id"]
+                    print(f"🔄 Processing update ID: {update['update_id']}")
                     
                     if "message" in update:
-                        self.handle_message(update["message"])
+                        message = update["message"]
+                        text = message.get("text", "")
+                        username = message["from"].get("username", "Unknown")
+                        print(f"📩 Message from {username}: '{text}'")
+                        self.handle_message(message)
                     elif "callback_query" in update:
                         # Handle callback queries if needed
+                        print(f"🔘 Callback query received")
                         pass
                 
-                time.sleep(30)  # Much longer delay between polls to avoid rate limiting
+                time.sleep(2)  # Quick polling for responsive buttons
                 
             except KeyboardInterrupt:
                 print("\n🛑 Stopping Telegram Bot...")

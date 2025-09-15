@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get configuration from environment variables or use defaults
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8251061362:AAEVeQ36DY-cSDPkjeoSt9065P6FBKQOKHA")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1003095344192")
-USER_CHAT_ID = os.getenv("USER_CHAT_ID", "7325836764")  # For direct bot messages
+TELEGRAM_BOT_TOKEN = "8251061362:AAEVeQ36DY-cSDPkjeoSt9065P6FBKQOKHA"  # Force this token
+TELEGRAM_CHAT_ID = "-1003095344192"  # Channel ID
+USER_CHAT_ID = "7325836764"  # User chat ID for bot responses
 
 # Debug info
 print(f"🔧 Bot Token: {TELEGRAM_BOT_TOKEN[:10]}...")
