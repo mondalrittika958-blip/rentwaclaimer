@@ -40,10 +40,14 @@ def main():
         from telegram_bot import TelegramBot
         bot = TelegramBot()
         bot.set_automation(automation)  # Connect automation to bot
-        bot_thread = threading.Thread(target=bot.start_polling, daemon=True)
+        bot_thread = threading.Thread(target=bot.start_polling, daemon=False)
         bot_thread.start()
 
-        # Start monitoring
+        # Give bot time to start
+        logger.info("⏳ Waiting for bot to initialize...")
+        time.sleep(10)
+        
+        # Start monitoring in background
         logger.info("🌐 Starting website monitoring...")
         
         # Test browser automation first
@@ -59,9 +63,19 @@ def main():
             import traceback
             traceback.print_exc()
         
-        # Start full monitoring
+        # Start full monitoring in background
         logger.info("🚀 Starting full monitoring...")
-        automation.start_monitoring()
+        monitor_thread = threading.Thread(target=automation.start_monitoring, daemon=True)
+        monitor_thread.start()
+        
+        # Keep main thread alive
+        logger.info("✅ All services started! Bot is now active.")
+        try:
+            while True:
+                time.sleep(60)
+                logger.info("💓 Bot heartbeat - All services running")
+        except KeyboardInterrupt:
+            logger.info("🛑 Shutting down...")
         
     except KeyboardInterrupt:
         logger.info("🛑 Automation stopped by user")
