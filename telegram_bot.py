@@ -183,7 +183,7 @@ class TelegramBot:
             
         except Exception as e:
             print(f"❌ Error in manual monitor: {e}")
-            self.send_message("❌ Error starting manual monitoring.")
+            self.send_message("❌ Error starting manual monitoring.", chat_id=chat_id)
 
     def handle_status(self, chat_id, username):
         """Handle status request"""
@@ -197,7 +197,7 @@ class TelegramBot:
 🤖 Bot: Running via polling method
 ⏰ Schedule: Every hour at 5 minutes past (12:05, 1:05, 2:05...)
             """
-            self.send_message(status_msg, reply_markup=self.get_main_menu())
+            self.send_message(status_msg, reply_markup=self.get_main_menu(), chat_id=chat_id)
         except Exception as e:
             print(f"❌ Error in status: {e}")
 
@@ -218,7 +218,7 @@ All sites are being monitored 24/7 for:
 • Reset button claims
 • Amount updates
             """
-            self.send_message(sites_msg, reply_markup=self.get_main_menu())
+            self.send_message(sites_msg, reply_markup=self.get_main_menu(), chat_id=chat_id)
         except Exception as e:
             print(f"❌ Error in sites: {e}")
 
@@ -235,7 +235,7 @@ Amounts are automatically sent when:
 • Amount changes detected
 • Login successful
             """
-            self.send_message(amount_msg, reply_markup=self.get_main_menu())
+            self.send_message(amount_msg, reply_markup=self.get_main_menu(), chat_id=chat_id)
         except Exception as e:
             print(f"❌ Error in amounts: {e}")
 
@@ -264,7 +264,7 @@ This bot monitors 4 websites automatically and sends notifications for:
 Monitoring happens every hour at 5 minutes past:
 12:05, 1:05, 2:05, 3:05... 24/7
             """
-            self.send_message(help_msg, reply_markup=self.get_main_menu())
+            self.send_message(help_msg, reply_markup=self.get_main_menu(), chat_id=chat_id)
         except Exception as e:
             print(f"❌ Error in help: {e}")
 
@@ -292,7 +292,7 @@ Monitoring happens every hour at 5 minutes past:
 • Reset button claims
 • System status updates
             """
-            self.send_message(schedule_msg, reply_markup=self.get_main_menu())
+            self.send_message(schedule_msg, reply_markup=self.get_main_menu(), chat_id=chat_id)
         except Exception as e:
             print(f"❌ Error in schedule: {e}")
 
