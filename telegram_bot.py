@@ -24,22 +24,23 @@ class TelegramBot:
         """Set automation instance for manual monitoring"""
         self.automation = automation
         
-    def send_message(self, text, parse_mode="HTML", reply_markup=None):
+    def send_message(self, text, parse_mode="HTML", reply_markup=None, chat_id=None):
         """Send message to Telegram with rate limiting"""
         if self.bot_token == "YOUR_BOT_TOKEN_HERE" or self.chat_id == "YOUR_CHAT_ID_HERE":
             print(f"📤 Telegram not configured. Would send: {text}")
             return False
             
         try:
+            target_chat_id = chat_id if chat_id else self.chat_id
             url = f"{self.base_url}/sendMessage"
             data = {
-                "chat_id": self.chat_id,
+                "chat_id": target_chat_id,
                 "text": text,
                 "parse_mode": parse_mode
             }
             
             if reply_markup:
-                data["reply_markup"] = reply_markup
+                data["reply_markup"] = json.dumps(reply_markup)
             
             response = requests.post(url, json=data, timeout=10)
             if response.status_code == 200:
@@ -151,10 +152,10 @@ class TelegramBot:
                 self.handle_schedule(chat_id, username)
             elif text.lower() in ["menu", "keyboard", "buttons"]:
                 # Force enable keyboard
-                self.send_message("🤖 Keyboard enabled! Use the menu buttons below:", reply_markup=self.get_main_menu())
+                self.send_message("🤖 Keyboard enabled! Use the menu buttons below:", reply_markup=self.get_main_menu(), chat_id=chat_id)
             else:
                 # Show main menu for any other message
-                self.send_message("🤖 Choose an option from the menu below:", reply_markup=self.get_main_menu())
+                self.send_message("🤖 Choose an option from the menu below:", reply_markup=self.get_main_menu(), chat_id=chat_id)
                 
         except Exception as e:
             print(f"❌ Error handling message: {e}")
@@ -163,18 +164,18 @@ class TelegramBot:
         """Handle manual monitoring request"""
         try:
             if not self.automation:
-                self.send_message("❌ Automation not available. Please try again later.")
+                self.send_message("❌ Automation not available. Please try again later.", chat_id=chat_id)
                 return
             
-            self.send_message("🔄 Starting manual monitoring... Please wait...")
+            self.send_message("🔄 Starting manual monitoring... Please wait...", reply_markup=self.get_main_menu(), chat_id=chat_id)
             
             # Run manual monitoring in a separate thread to avoid blocking
             def run_manual_monitor():
                 try:
                     self.automation.manual_monitor_all()
-                    self.send_message("✅ Manual monitoring completed!")
+                    self.send_message("✅ Manual monitoring completed!", reply_markup=self.get_main_menu(), chat_id=chat_id)
                 except Exception as e:
-                    self.send_message(f"❌ Manual monitoring failed: {e}")
+                    self.send_message(f"❌ Manual monitoring failed: {e}", reply_markup=self.get_main_menu(), chat_id=chat_id)
             
             monitor_thread = threading.Thread(target=run_manual_monitor, daemon=True)
             monitor_thread.start()
@@ -320,7 +321,7 @@ Hello {username}! Welcome to the Website Monitor Bot.
 
 Bot is running and monitoring all websites 24/7!
                 """
-                self.send_message(welcome_msg, reply_markup=self.get_main_menu())
+                self.send_message(welcome_msg, reply_markup=self.get_main_menu(), chat_id=chat_id)
                 print(f"✅ Welcome message with keyboard sent to {username}")
                 
             elif command == "/status":
@@ -342,7 +343,7 @@ Bot is running and monitoring all websites 24/7!
                 self.handle_schedule(chat_id, username)
                 
             else:
-                self.send_message(f"❓ Unknown command: {command}\nUse the menu buttons below or type /help for available commands.", reply_markup=self.get_main_menu())
+                self.send_message(f"❓ Unknown command: {command}\nUse the menu buttons below or type /help for available commands.", reply_markup=self.get_main_menu(), chat_id=chat_id)
                 
         except Exception as e:
             print(f"❌ Error handling command: {e}")

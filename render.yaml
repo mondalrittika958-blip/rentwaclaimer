@@ -10,7 +10,7 @@ services:
       - key: PORT
         value: 10000
       - key: TELEGRAM_BOT_TOKEN
-        value: 8251061362:AAGJgQDANqnOUYogInclBP3sZ6LVYlz4HoQ
+        value: 8251061362:AAEVeQ36DY-cSDPkjeoSt9065P6FBKQOKHA
       - key: TELEGRAM_CHAT_ID
         value: -1003095344192
       - key: PYTHON_VERSION

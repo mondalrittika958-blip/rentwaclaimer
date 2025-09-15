@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get configuration from environment variables or use defaults
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8251061362:AAGJgQDANqnOUYogInclBP3sZ6LVYlz4HoQ")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8251061362:AAEVeQ36DY-cSDPkjeoSt9065P6FBKQOKHA")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "-1003095344192")
 
 # Debug info
