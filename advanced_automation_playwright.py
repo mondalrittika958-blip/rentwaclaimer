@@ -214,13 +214,20 @@ class AdvancedAutomation:
             return None
     
     def send_amount_update(self, site_name, message, action):
-        """Send amount update to Telegram"""
+        """Send amount update to Telegram Channel"""
         try:
             from telegram_bot import TelegramBot
             bot = TelegramBot()
             
-            # Send the message directly (already formatted)
-            bot.send_message(message)
+            # Send monitoring data to channel only
+            if action in ["monitoring_update", "reset_claimed", "reset_not_found"]:
+                # Send to channel (monitoring data)
+                bot.send_message(message)
+                print(f"📱 [send_amount_update] Channel notification sent for {site_name}")
+            else:
+                # Send to bot (other messages)
+                bot.send_message(message)
+                print(f"📱 [send_amount_update] Bot notification sent for {site_name}")
         except Exception as e:
             print(f"❌ Error sending notification for {site_name}: {e}")
     
@@ -677,12 +684,13 @@ class AdvancedAutomation:
         """Manually monitor all sites immediately"""
         print("🔄 [manual_monitor_all] Starting manual monitoring round...")
         
-        # Send start notification
+        # Send start notification to bot
         try:
             from telegram_bot import TelegramBot
             bot = TelegramBot()
             start_message = f"🔄 **Manual Monitoring Started**\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\n📊 Monitoring {len(WEBSITES)} websites..."
             bot.send_message(start_message)
+            print(f"📱 [manual_monitor_all] Start notification sent to bot")
         except Exception as e:
             print(f"❌ Error sending start notification: {e}")
         
@@ -700,12 +708,13 @@ class AdvancedAutomation:
             print(f"⏳ Waiting 5 seconds before next site...")
             time.sleep(5)
         
-        # Send completion notification
+        # Send completion notification to bot
         try:
             from telegram_bot import TelegramBot
             bot = TelegramBot()
             end_message = f"✅ **Manual Monitoring Completed**\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\n📊 All {len(WEBSITES)} websites monitored successfully!"
             bot.send_message(end_message)
+            print(f"📱 [manual_monitor_all] Completion notification sent to bot")
         except Exception as e:
             print(f"❌ Error sending completion notification: {e}")
         
