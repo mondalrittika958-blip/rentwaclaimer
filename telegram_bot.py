@@ -108,9 +108,21 @@ class TelegramBot:
                 [{"text": "❓ Help"}, {"text": "⏰ Schedule"}]
             ],
             "resize_keyboard": True,
-            "one_time_keyboard": False
+            "one_time_keyboard": False,
+            "selective": False
         }
         return keyboard
+    
+    def enable_keyboard(self):
+        """Enable keyboard for the chat"""
+        try:
+            # Send a message with keyboard to enable it
+            self.send_message("🤖 Bot keyboard enabled! Use the menu buttons below:", reply_markup=self.get_main_menu())
+            print("✅ Keyboard enabled for chat")
+            return True
+        except Exception as e:
+            print(f"❌ Error enabling keyboard: {e}")
+            return False
 
     def handle_message(self, message):
         """Handle incoming message"""
@@ -306,6 +318,7 @@ Hello {username}! Welcome to the Website Monitor Bot.
 Bot is running and monitoring all websites 24/7!
                 """
                 self.send_message(welcome_msg, reply_markup=self.get_main_menu())
+                print(f"✅ Welcome message with keyboard sent to {username}")
                 
             elif command == "/status":
                 self.handle_status(chat_id, username)
@@ -339,6 +352,27 @@ Bot is running and monitoring all websites 24/7!
             
         print("🤖 Starting Telegram Bot (Polling Method)...")
         self.running = True
+        
+        # Send welcome message with keyboard to enable it
+        try:
+            welcome_msg = """
+🤖 **Website Monitor Bot Started!**
+
+Use the menu buttons below to control the bot:
+
+🔄 **Monitor Now** - Start monitoring immediately
+📊 **Status** - Check bot status
+🌐 **Sites** - Show monitored websites
+💰 **Amounts** - Get current amounts
+❓ **Help** - Show help information
+⏰ **Schedule** - Show monitoring schedule
+
+Bot is running and monitoring all websites 24/7!
+            """
+            self.send_message(welcome_msg, reply_markup=self.get_main_menu())
+            print("✅ Welcome message with keyboard sent")
+        except Exception as e:
+            print(f"❌ Error sending welcome message: {e}")
         
         while self.running:
             try:
