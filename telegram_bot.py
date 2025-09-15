@@ -149,8 +149,11 @@ class TelegramBot:
                 self.handle_help(chat_id, username)
             elif text == "⏰ Schedule":
                 self.handle_schedule(chat_id, username)
+            elif text.lower() in ["menu", "keyboard", "buttons"]:
+                # Force enable keyboard
+                self.send_message("🤖 Keyboard enabled! Use the menu buttons below:", reply_markup=self.get_main_menu())
             else:
-                # Show main menu
+                # Show main menu for any other message
                 self.send_message("🤖 Choose an option from the menu below:", reply_markup=self.get_main_menu())
                 
         except Exception as e:
@@ -353,6 +356,10 @@ Bot is running and monitoring all websites 24/7!
         print("🤖 Starting Telegram Bot (Polling Method)...")
         self.running = True
         
+        # Wait a bit for bot to fully initialize
+        import time
+        time.sleep(5)
+        
         # Send welcome message with keyboard to enable it
         try:
             welcome_msg = """
@@ -369,10 +376,15 @@ Use the menu buttons below to control the bot:
 
 Bot is running and monitoring all websites 24/7!
             """
-            self.send_message(welcome_msg, reply_markup=self.get_main_menu())
-            print("✅ Welcome message with keyboard sent")
+            result = self.send_message(welcome_msg, reply_markup=self.get_main_menu())
+            if result:
+                print("✅ Welcome message with keyboard sent successfully")
+            else:
+                print("❌ Failed to send welcome message")
         except Exception as e:
             print(f"❌ Error sending welcome message: {e}")
+            import traceback
+            traceback.print_exc()
         
         while self.running:
             try:
