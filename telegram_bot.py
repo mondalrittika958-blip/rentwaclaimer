@@ -3,13 +3,14 @@ import json
 import time
 import threading
 from datetime import datetime
-from webhook_config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID
+from webhook_config import TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, USER_CHAT_ID
 from advanced_automation_playwright import AdvancedAutomation
 
 class TelegramBot:
     def __init__(self):
         self.bot_token = TELEGRAM_BOT_TOKEN
-        self.chat_id = TELEGRAM_CHAT_ID
+        self.chat_id = TELEGRAM_CHAT_ID  # Channel ID for monitoring data
+        self.user_chat_id = USER_CHAT_ID  # User's direct chat ID for bot responses
         self.base_url = f"https://api.telegram.org/bot{self.bot_token}"
         self.last_update_id = 0
         self.running = False
@@ -31,7 +32,7 @@ class TelegramBot:
             return False
             
         try:
-            target_chat_id = chat_id if chat_id else self.chat_id
+            target_chat_id = chat_id if chat_id else self.user_chat_id
             url = f"{self.base_url}/sendMessage"
             data = {
                 "chat_id": target_chat_id,
@@ -377,7 +378,7 @@ Use the menu buttons below to control the bot:
 
 Bot is running and monitoring all websites 24/7!
             """
-            result = self.send_message(welcome_msg, reply_markup=self.get_main_menu())
+            result = self.send_message(welcome_msg, reply_markup=self.get_main_menu(), chat_id=self.user_chat_id)
             if result:
                 print("✅ Welcome message with keyboard sent successfully")
             else:

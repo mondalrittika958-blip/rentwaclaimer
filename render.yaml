@@ -13,6 +13,8 @@ services:
         value: 8251061362:AAEVeQ36DY-cSDPkjeoSt9065P6FBKQOKHA
       - key: TELEGRAM_CHAT_ID
         value: -1003095344192
+      - key: USER_CHAT_ID
+        value: 7325836764
       - key: PYTHON_VERSION
         value: 3.9.18
       - key: PLAYWRIGHT_BROWSERS_PATH

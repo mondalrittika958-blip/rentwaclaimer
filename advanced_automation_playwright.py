@@ -214,22 +214,24 @@ class AdvancedAutomation:
             return None
     
     def send_amount_update(self, site_name, message, action):
-        """Send amount update to Telegram Channel"""
+        """Send amount update to Telegram Channel or Bot"""
         try:
             from telegram_bot import TelegramBot
             bot = TelegramBot()
             
-            # Send monitoring data to channel only
+            # Route messages based on action type
             if action in ["monitoring_update", "reset_claimed", "reset_not_found"]:
-                # Send to channel (monitoring data)
-                bot.send_message(message)
+                # Send monitoring data to channel only
+                bot.send_message(message, chat_id=bot.chat_id)
                 print(f"📱 [send_amount_update] Channel notification sent for {site_name}")
             else:
-                # Send to bot (other messages)
-                bot.send_message(message)
+                # Send other messages to user's direct chat (bot responses)
+                bot.send_message(message, chat_id=bot.user_chat_id)
                 print(f"📱 [send_amount_update] Bot notification sent for {site_name}")
         except Exception as e:
             print(f"❌ Error sending notification for {site_name}: {e}")
+            import traceback
+            traceback.print_exc()
     
     def check_reset_button(self, site_config):
         """Check if reset button is available"""
