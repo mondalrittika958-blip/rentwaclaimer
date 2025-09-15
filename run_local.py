@@ -30,18 +30,19 @@ def main():
         if os.environ.get('PORT'):
             logger.info("🏥 Starting health server...")
             run_health_server()
-        
+
+        # Create automation instance
+        logger.info("🤖 Creating automation instance...")
+        automation = AdvancedAutomation()
+
         # Start Telegram bot in background
         logger.info("🤖 Starting Telegram bot...")
         from telegram_bot import TelegramBot
         bot = TelegramBot()
+        bot.set_automation(automation)  # Connect automation to bot
         bot_thread = threading.Thread(target=bot.start_polling, daemon=True)
         bot_thread.start()
-        
-        # Create automation instance
-        logger.info("🤖 Creating automation instance...")
-        automation = AdvancedAutomation()
-        
+
         # Start monitoring
         logger.info("🌐 Starting website monitoring...")
         

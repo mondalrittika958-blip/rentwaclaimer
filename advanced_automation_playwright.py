@@ -213,20 +213,13 @@ class AdvancedAutomation:
             print(f"❌ Error getting amount for {site_name}: {e}")
             return None
     
-    def send_amount_update(self, site_name, amount, action):
+    def send_amount_update(self, site_name, message, action):
         """Send amount update to Telegram"""
         try:
             from telegram_bot import TelegramBot
             bot = TelegramBot()
             
-            # Create detailed message based on action
-            if action == "reset_claimed":
-                message = f"🔄 {site_name}\n✅ Action: Reset Button Claimed\n💵 Amount: {amount}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\n🎉 Reset button successfully clicked!"
-            elif action == "reset_not_found":
-                message = f"🔄 {site_name}\n❌ Action: Reset Button Not Found\n💵 Amount: {amount}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\nℹ️ No reset button available at this time"
-            else:
-                message = f"💰 {site_name}\n🔄 Action: {action}\n💵 Amount: {amount}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}"
-            
+            # Send the message directly (already formatted)
             bot.send_message(message)
         except Exception as e:
             print(f"❌ Error sending notification for {site_name}: {e}")
@@ -576,33 +569,38 @@ class AdvancedAutomation:
                 # Get amount
                 print(f"💰 [monitor_site_once] Getting amount for {site_name}")
                 amount = self.get_amount(site_config)
-                if amount:
-                    print(f"✅ [monitor_site_once] Amount retrieved for {site_name}: {amount}")
-                    self.send_amount_update(site_name, amount, "amount_update")
-                    print(f"📱 [monitor_site_once] Telegram notification sent for {site_name}")
-                else:
-                    print(f"❌ [monitor_site_once] No amount found for {site_name}")
                 
                 # Check reset button every 1 hour
                 current_time = datetime.now()
                 print(f"🔄 [monitor_site_once] Checking reset button eligibility for {site_name}")
-                if site_name not in self.last_reset_times or \
-                   current_time - self.last_reset_times[site_name] >= timedelta(hours=1):
-                    
+                reset_status = ""
+                reset_eligible = site_name not in self.last_reset_times or \
+                               current_time - self.last_reset_times[site_name] >= timedelta(hours=1)
+                
+                if reset_eligible:
                     print(f"🔄 [monitor_site_once] Reset button is eligible for {site_name}")
                     if self.claim_reset_button(site_config):
                         self.last_reset_times[site_name] = current_time
+                        reset_status = "✅ Reset button claimed"
                         print(f"✅ [monitor_site_once] Reset button claimed for {site_name}")
-                        # Send notification for successful reset button claim
-                        self.send_amount_update(site_name, "Reset button claimed", "reset_claimed")
-                        print(f"📱 [monitor_site_once] Reset button claim notification sent for {site_name}")
                     else:
-                        print(f"❌ [monitor_site_once] Reset button claim failed for {site_name}")
-                        # Send notification for failed reset button claim
-                        self.send_amount_update(site_name, "Reset button not found", "reset_not_found")
-                        print(f"📱 [monitor_site_once] Reset button not found notification sent for {site_name}")
+                        reset_status = "❌ Reset button not found"
+                        print(f"❌ [monitor_site_once] Reset button not found for {site_name}")
                 else:
+                    reset_status = "⏰ Reset button not yet eligible"
                     print(f"⏰ [monitor_site_once] Reset button not yet eligible for {site_name}")
+                
+                # Send single comprehensive notification
+                if amount:
+                    print(f"✅ [monitor_site_once] Amount retrieved for {site_name}: {amount}")
+                    message = f"🔄 {site_name}\n💰 Amount: {amount}\n{reset_status}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}"
+                    self.send_amount_update(site_name, message, "monitoring_update")
+                    print(f"📱 [monitor_site_once] Single notification sent for {site_name}")
+                else:
+                    print(f"❌ [monitor_site_once] No amount found for {site_name}")
+                    message = f"🔄 {site_name}\n❌ No amount found\n{reset_status}\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}"
+                    self.send_amount_update(site_name, message, "monitoring_update")
+                    print(f"📱 [monitor_site_once] Single notification sent for {site_name}")
             else:
                 print(f"❌ [monitor_site_once] Login failed for {site_name}")
                 
@@ -630,28 +628,39 @@ class AdvancedAutomation:
         print(f"📊 Will monitor {len(WEBSITES)} websites:")
         for site in WEBSITES:
             print(f"  - {site['name']}")
-        
+
         # Monitor sites sequentially to avoid threading issues
         try:
             while self.running:
-                print(f"\n🔄 [start_monitoring] Starting monitoring round...")
-                for i, site_config in enumerate(WEBSITES, 1):
-                    if not self.running:
-                        break
+                # Check if it's time to monitor (every hour at 5 minutes past)
+                current_time = datetime.now()
+                if current_time.minute == 5:
+                    print(f"\n🔄 [start_monitoring] Starting scheduled monitoring round at {current_time.strftime('%H:%M')}...")
+                    for i, site_config in enumerate(WEBSITES, 1):
+                        if not self.running:
+                            break
+                        
+                        print(f"\n🔍 [start_monitoring] [{i}/{len(WEBSITES)}] Monitoring {site_config['name']}...")
+                        print(f"🌐 [start_monitoring] URL: {site_config['url']}")
+                        print(f"🔑 [start_monitoring] Username: {site_config.get('username', 'N/A')}")
+                        print(f"🔐 [start_monitoring] Password: {'*' * len(site_config.get('password', ''))}")
+                        self.monitor_site_once(site_config)
+                        
+                        # Small delay between sites
+                        print(f"⏳ Waiting 5 seconds before next site...")
+                        time.sleep(5)
                     
-                    print(f"\n🔍 [start_monitoring] [{i}/{len(WEBSITES)}] Monitoring {site_config['name']}...")
-                    print(f"🌐 [start_monitoring] URL: {site_config['url']}")
-                    print(f"🔑 [start_monitoring] Username: {site_config.get('username', 'N/A')}")
-                    print(f"🔐 [start_monitoring] Password: {'*' * len(site_config.get('password', ''))}")
-                    self.monitor_site_once(site_config)
+                    print(f"\n⏳ Scheduled round completed. Next monitoring at {(current_time + timedelta(hours=1)).strftime('%H:%M')}...")
+                else:
+                    next_monitor_time = current_time.replace(minute=5, second=0, microsecond=0)
+                    if next_monitor_time <= current_time:
+                        next_monitor_time += timedelta(hours=1)
                     
-                    # Small delay between sites
-                    print(f"⏳ Waiting 5 seconds before next site...")
-                    time.sleep(5)
+                    wait_seconds = (next_monitor_time - current_time).total_seconds()
+                    print(f"⏳ Next monitoring at {next_monitor_time.strftime('%H:%M')} (in {wait_seconds/60:.1f} minutes)...")
                 
-                # Wait before next round
-                print(f"\n⏳ Round completed. Waiting 1 hour before next monitoring round...")
-                time.sleep(3600)
+                # Wait 1 minute before checking again
+                time.sleep(60)
                 
         except KeyboardInterrupt:
             print("🛑 Stopping automation...")
@@ -664,6 +673,44 @@ class AdvancedAutomation:
             print("🔄 Continuing monitoring after error...")
             time.sleep(60)  # Wait 1 minute before retrying
     
+    def manual_monitor_all(self):
+        """Manually monitor all sites immediately"""
+        print("🔄 [manual_monitor_all] Starting manual monitoring round...")
+        
+        # Send start notification
+        try:
+            from telegram_bot import TelegramBot
+            bot = TelegramBot()
+            start_message = f"🔄 **Manual Monitoring Started**\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\n📊 Monitoring {len(WEBSITES)} websites..."
+            bot.send_message(start_message)
+        except Exception as e:
+            print(f"❌ Error sending start notification: {e}")
+        
+        for i, site_config in enumerate(WEBSITES, 1):
+            if not self.running:
+                break
+            
+            print(f"\n🔍 [manual_monitor_all] [{i}/{len(WEBSITES)}] Monitoring {site_config['name']}...")
+            print(f"🌐 [manual_monitor_all] URL: {site_config['url']}")
+            print(f"🔑 [manual_monitor_all] Username: {site_config.get('username', 'N/A')}")
+            print(f"🔐 [manual_monitor_all] Password: {'*' * len(site_config.get('password', ''))}")
+            self.monitor_site_once(site_config)
+            
+            # Small delay between sites
+            print(f"⏳ Waiting 5 seconds before next site...")
+            time.sleep(5)
+        
+        # Send completion notification
+        try:
+            from telegram_bot import TelegramBot
+            bot = TelegramBot()
+            end_message = f"✅ **Manual Monitoring Completed**\n⏰ Time: {time.strftime('%Y-%m-%d %H:%M:%S')}\n📊 All {len(WEBSITES)} websites monitored successfully!"
+            bot.send_message(end_message)
+        except Exception as e:
+            print(f"❌ Error sending completion notification: {e}")
+        
+        print(f"\n✅ [manual_monitor_all] Manual monitoring round completed!")
+
     def stop_monitoring(self):
         """Stop monitoring"""
         self.running = False
