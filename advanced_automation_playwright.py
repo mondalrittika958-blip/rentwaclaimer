@@ -73,7 +73,7 @@ class AdvancedAutomation:
         site_name = site_config["name"]
         print(f"🔐 Logging into {site_name}...")
         
-        max_retries = 3
+        max_retries = 10
         for attempt in range(max_retries):
             try:
                 print(f"🔄 Login attempt {attempt + 1}/{max_retries} for {site_name}")
@@ -170,6 +170,14 @@ class AdvancedAutomation:
             except Exception as e:
                 print(f"❌ Error logging into {site_name} (attempt {attempt + 1}): {e}")
                 if attempt < max_retries - 1:
+                    # Reload page before retry
+                    try:
+                        print(f"🔄 Reloading page before retry {attempt + 2}/{max_retries} for {site_name}")
+                        self.current_page.reload(timeout=30000)
+                        time.sleep(3)  # Wait after reload
+                    except Exception as reload_error:
+                        print(f"⚠️ Page reload failed: {reload_error}")
+                    
                     time.sleep(5)
                     continue
                 else:
